@@ -63,6 +63,12 @@ class KID3_CORE_EXPORT TagConfig : public StoredConfig<TagConfig> {
   /** true to use "id3 " instead of "ID3 " chunk names in WAV files */
   Q_PROPERTY(bool lowercaseId3RiffChunk READ lowercaseId3RiffChunk
              WRITE setLowercaseId3RiffChunk NOTIFY lowercaseId3RiffChunkChanged)
+  /** true to write delimited artist and genre values as multiple values */
+  Q_PROPERTY(bool expandDelimitedTags READ expandDelimitedTags
+             WRITE setExpandDelimitedTags NOTIFY expandDelimitedTagsChanged)
+  /** delimiter used to split values when expandDelimitedTags is set */
+  Q_PROPERTY(QString tagDelimiter READ tagDelimiter WRITE setTagDelimiter
+             NOTIFY tagDelimiterChanged)
   /** field name used for Vorbis comment entries */
   Q_PROPERTY(QString commentName READ commentName WRITE setCommentName
              NOTIFY commentNameChanged)
@@ -224,6 +230,18 @@ public:
 
   /** Set true to use "id3 " instead of "ID3 " chunk names in WAV files */
   void setLowercaseId3RiffChunk(bool lowercaseId3RiffChunk);
+
+  /** true to write delimited artist and genre values as multiple values */
+  bool expandDelimitedTags() const { return m_expandDelimitedTags; }
+
+  /** Set true to write delimited artist and genre values as multiple values. */
+  void setExpandDelimitedTags(bool expandDelimitedTags);
+
+  /** delimiter used to split values when expandDelimitedTags is set */
+  QString tagDelimiter() const { return m_tagDelimiter; }
+
+  /** Set delimiter used to split values when expandDelimitedTags is set. */
+  void setTagDelimiter(const QString& tagDelimiter);
 
   /** field name used for Vorbis comment entries */
   QString commentName() const { return m_commentName; }
@@ -512,6 +530,12 @@ signals:
   /** Emitted when @a lowercaseId3RiffChunk changed. */
   void lowercaseId3RiffChunkChanged(bool lowercaseId3RiffChunk);
 
+  /** Emitted when @a expandDelimitedTags changed. */
+  void expandDelimitedTagsChanged(bool expandDelimitedTags);
+
+  /** Emitted when @a tagDelimiter changed. */
+  void tagDelimiterChanged(const QString& tagDelimiter);
+
   /** Emitted when @a commentName changed. */
   void commentNameChanged(const QString& commentName);
 
@@ -592,6 +616,8 @@ private:
   bool m_enableTotalNumberOfTracks;
   bool m_genreNotNumeric;
   bool m_lowercaseId3RiffChunk;
+  bool m_expandDelimitedTags;
+  QString m_tagDelimiter;
 
   static QStringList s_textCodecNames;
   /** Index in configuration storage */

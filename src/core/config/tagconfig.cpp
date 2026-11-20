@@ -247,7 +247,9 @@ TagConfig::TagConfig()
     m_markTruncations(true),
     m_enableTotalNumberOfTracks(false),
     m_genreNotNumeric(true),
-    m_lowercaseId3RiffChunk(false)
+    m_lowercaseId3RiffChunk(false),
+    m_expandDelimitedTags(false),
+    m_tagDelimiter(QLatin1String(";"))
 {
   m_disabledPlugins << QLatin1String("Mp4v2Metadata");
 }
@@ -282,6 +284,10 @@ void TagConfig::writeToConfig(ISettings* config) const
                    QVariant(m_genreNotNumeric));
   config->setValue(QLatin1String("LowercaseId3RiffChunk"),
                    QVariant(m_lowercaseId3RiffChunk));
+  config->setValue(QLatin1String("ExpandDelimitedTags"),
+                   QVariant(m_expandDelimitedTags));
+  config->setValue(QLatin1String("TagDelimiter"),
+                   QVariant(m_tagDelimiter));
   config->setValue(QLatin1String("CommentName"),
                    QVariant(m_commentName));
   config->setValue(QLatin1String("PictureNameItem"),
@@ -347,6 +353,10 @@ void TagConfig::readFromConfig(ISettings* config)
                                     m_genreNotNumeric).toBool();
   m_lowercaseId3RiffChunk = config->value(QLatin1String("LowercaseId3RiffChunk"),
                                           m_lowercaseId3RiffChunk).toBool();
+  m_expandDelimitedTags = config->value(QLatin1String("ExpandDelimitedTags"),
+                                        m_expandDelimitedTags).toBool();
+  m_tagDelimiter = config->value(QLatin1String("TagDelimiter"),
+                                 m_tagDelimiter).toString();
   m_commentName =
       config->value(QLatin1String("CommentName"),
                     QString::fromLatin1(defaultCommentName)).toString();
@@ -498,6 +508,24 @@ void TagConfig::setLowercaseId3RiffChunk(bool lowercaseId3RiffChunk)
   if (m_lowercaseId3RiffChunk != lowercaseId3RiffChunk) {
     m_lowercaseId3RiffChunk = lowercaseId3RiffChunk;
     emit lowercaseId3RiffChunkChanged(m_lowercaseId3RiffChunk);
+  }
+}
+
+/** Set true to write delimited artist and genre values as multiple values. */
+void TagConfig::setExpandDelimitedTags(bool expandDelimitedTags)
+{
+  if (m_expandDelimitedTags != expandDelimitedTags) {
+    m_expandDelimitedTags = expandDelimitedTags;
+    emit expandDelimitedTagsChanged(m_expandDelimitedTags);
+  }
+}
+
+/** Set delimiter used to split values when expandDelimitedTags is set. */
+void TagConfig::setTagDelimiter(const QString& tagDelimiter)
+{
+  if (m_tagDelimiter != tagDelimiter) {
+    m_tagDelimiter = tagDelimiter;
+    emit tagDelimiterChanged(m_tagDelimiter);
   }
 }
 

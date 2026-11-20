@@ -118,6 +118,80 @@ QString pluginFileName(const QString& pluginName)
 }
 
 /**
+ * Expand artist and genre values containing the delimiter configured in
+ * TagConfig into multiple values. Vorbis comments get one field per value,
+ * other tag formats use Frame::stringListSeparator().
+ * @param taggedFile tagged file to modify
+ */
+void expandDelimitedFrames(TaggedFile* taggedFile)
+{
+  const TagConfig& tagCfg = TagConfig::instance();
+  const QString delimiter = tagCfg.tagDelimiter();
+  if (!tagCfg.expandDelimitedTags() || delimiter.isEmpty()) {
+    return;
+  }
+  const auto tagNrs = Frame::allTagNumbers();
+  for (Frame::TagNumber tagNr : tagNrs) {
+    if (tagNr == Frame::Tag_Id3v1) {
+      continue;
+    }
+    FrameCollection frames;
+    taggedFile->getAllFrames(tagNr, frames);
+    const bool separateFields =
+        taggedFile->getTagFormat(tagNr) == QLatin1String("Vorbis");
+    QList<Frame> addedFrames;
+    for (const Frame& frame : frames) {
+      switch (frame.getType()) {
+      case Frame::FT_Artist:
+      case Frame::FT_AlbumArtist:
+      case Frame::FT_OriginalArtist:
+      case Frame::FT_SortArtist:
+      case Frame::FT_SortAlbumArtist:
+      case Frame::FT_Performer:
+      case Frame::FT_Genre:
+        break;
+      default:
+        // Custom frame, e.g. "TRACKARTIST" or "TXXX - ...\nTRACKARTIST"
+        if (frame.getName().section(QLatin1Char('\n'), -1)
+            .compare(QLatin1String("TRACKARTIST"), Qt::CaseInsensitive) != 0) {
+          continue;
+        }
+      }
+      if (!frame.getValue().contains(delimiter)) {
+        continue;
+      }
+      QStringList values;
+      const QStringList parts = frame.getValue().split(delimiter);
+      for (const QString& part : parts) {
+        if (QString value = part.trimmed(); !value.isEmpty()) {
+          values.append(value);
+        }
+      }
+      if (values.isEmpty()) {
+        continue;
+      }
+      Frame changedFrame(frame);
+      if (separateFields) {
+        changedFrame.setValueIfChanged(values.takeFirst());
+        for (const QString& value : std::as_const(values)) {
+          addedFrames.append(
+                Frame(frame.getType(), value, frame.getInternalName(), -1));
+        }
+      } else {
+        changedFrame.setValueIfChanged(
+              values.join(Frame::stringListSeparator()));
+      }
+      taggedFile->setFrame(tagNr, changedFrame);
+    }
+    // Add new fields only after all existing fields have been set because
+    // adding fields can change the indexes of existing fields.
+    for (Frame& frame : addedFrames) {
+      taggedFile->addFrame(tagNr, frame);
+    }
+  }
+}
+
+/**
  * Get text encoding from tag config as frame text encoding.
  * @return frame text encoding.
  */
@@ -1080,6 +1154,7 @@ QStringList Kid3Application::saveDirectory(QStringList* errorDescriptions)
       errno = 0;
     }
     if (!taggedFile->isChanged()) continue; // do not consider a non-changed file when reporting progress.
+    expandDelimitedFrames(taggedFile);
     if (!taggedFile->writeTags(false, &renamed,
                                FileConfig::instance().preserveTime())) {
       if (QDir dir(taggedFile->getDirname());

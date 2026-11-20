@@ -570,6 +570,28 @@ class CliFunctionsTestCase(unittest.TestCase):
                             '  CUSTOM                  Custom 3\n')
                 self.assertEqual(actual, expected)
 
+    def test_flac_expand_delimited_tags(self):
+        with Kid3ConfigFileUsingOnlyTagLib():
+            with tempfile.TemporaryDirectory() as tmpdir:
+                flacpath = os.path.join(tmpdir, 'test.flac')
+                create_test_file(flacpath)
+                call_kid3_cli(
+                    ['-c', 'config Tag.expandDelimitedTags true',
+                     '-c', 'set artist "A;B" 2',
+                     '-c', 'set genre "Electronic; Pop;Electro" 2',
+                     '-c', 'set TRACKARTIST "C;D" 2',
+                     '-c', 'set title "X;Y" 2', flacpath])
+                self.assertEqual(call_kid3_cli(
+                    ['-c', 'get artist 2',
+                     '-c', 'get artist[1] 2',
+                     '-c', 'get genre 2',
+                     '-c', 'get genre[1] 2',
+                     '-c', 'get genre[2] 2',
+                     '-c', 'get TRACKARTIST 2',
+                     '-c', 'get TRACKARTIST[1] 2',
+                     '-c', 'get title 2', flacpath]),
+                    'A\nB\nElectronic\nPop\nElectro\nC\nD\nX;Y\n')
+
     def test_flac_oggflac(self):
         with Kid3ConfigFileUsingOnlyOggFlac():
             self._run_flac_tests()

@@ -149,7 +149,9 @@ ConfigDialogPages::ConfigDialogPages(IPlatformTools* platformTools,
   m_markOversizedPicturesCheckBox(nullptr),
   m_maximumPictureSizeSpinBox(nullptr), m_genreNotNumericCheckBox(nullptr),
   m_lowercaseId3ChunkCheckBox(nullptr),
-  m_markStandardViolationsCheckBox(nullptr), m_textEncodingComboBox(nullptr),
+  m_markStandardViolationsCheckBox(nullptr),
+  m_expandDelimitedTagsCheckBox(nullptr), m_tagDelimiterLineEdit(nullptr),
+  m_textEncodingComboBox(nullptr),
   m_id3v2VersionComboBox(nullptr), m_trackNumberDigitsSpinBox(nullptr),
   m_fnFormatBox(nullptr), m_tagFormatBox(nullptr),
   m_onlyCustomGenresCheckBox(nullptr), m_genresEditModel(nullptr),
@@ -404,7 +406,23 @@ QWidget* ConfigDialogPages::createTagsPage()
   m_starRatingMappingsModel = new StarRatingMappingsModel(ratingGroupBox);
   auto ratingEdit = new TableModelEdit(m_starRatingMappingsModel);
   ratingLayout->addWidget(ratingEdit);
+  auto multipleValuesGroupBox =
+      new QGroupBox(tr("Multiple Values"), tag1AndTag2Page);
+  m_expandDelimitedTagsCheckBox = new QCheckBox(
+        tr("E&xpand delimited tags"), multipleValuesGroupBox);
+  m_expandDelimitedTagsCheckBox->setToolTip(
+        tr("Write delimited artist, performer and genre values as multiple "
+           "values when saving"));
+  auto tagDelimiterLabel =
+      new QLabel(tr("Deli&miter:"), multipleValuesGroupBox);
+  m_tagDelimiterLineEdit = new QLineEdit(multipleValuesGroupBox);
+  tagDelimiterLabel->setBuddy(m_tagDelimiterLineEdit);
+  auto multipleValuesLayout = new QHBoxLayout(multipleValuesGroupBox);
+  multipleValuesLayout->addWidget(m_expandDelimitedTagsCheckBox);
+  multipleValuesLayout->addWidget(tagDelimiterLabel);
+  multipleValuesLayout->addWidget(m_tagDelimiterLineEdit);
   tag1AndTag2Layout->addWidget(m_tagFormatBox);
+  tag1AndTag2Layout->addWidget(multipleValuesGroupBox);
   tag1AndTag2Layout->addWidget(ratingGroupBox);
 
   auto tagsTabWidget = new QTabWidget;
@@ -817,6 +835,8 @@ void ConfigDialogPages::setConfigs(
   m_genreNotNumericCheckBox->setChecked(tagCfg.genreNotNumeric());
   m_lowercaseId3ChunkCheckBox->setChecked(tagCfg.lowercaseId3RiffChunk());
   m_markStandardViolationsCheckBox->setChecked(tagCfg.markStandardViolations());
+  m_expandDelimitedTagsCheckBox->setChecked(tagCfg.expandDelimitedTags());
+  m_tagDelimiterLineEdit->setText(tagCfg.tagDelimiter());
   m_textEncodingV1ComboBox->setCurrentIndex(tagCfg.textEncodingV1Index());
   m_textEncodingComboBox->setCurrentIndex(tagCfg.textEncoding());
   m_id3v2VersionComboBox->setCurrentIndex(
@@ -957,6 +977,8 @@ void ConfigDialogPages::getConfig() const
   tagCfg.setGenreNotNumeric(m_genreNotNumericCheckBox->isChecked());
   tagCfg.setLowercaseId3RiffChunk(m_lowercaseId3ChunkCheckBox->isChecked());
   tagCfg.setMarkStandardViolations(m_markStandardViolationsCheckBox->isChecked());
+  tagCfg.setExpandDelimitedTags(m_expandDelimitedTagsCheckBox->isChecked());
+  tagCfg.setTagDelimiter(m_tagDelimiterLineEdit->text());
   tagCfg.setTextEncodingV1Index(m_textEncodingV1ComboBox->currentIndex());
   tagCfg.setTextEncoding(m_textEncodingComboBox->currentIndex());
   tagCfg.setId3v2Version(m_id3v2VersionComboBox->itemData(

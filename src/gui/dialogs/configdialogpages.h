@@ -184,6 +184,10 @@ private:
   QCheckBox* m_lowercaseId3ChunkCheckBox;
   /** Mark standard violations check box */
   QCheckBox* m_markStandardViolationsCheckBox;
+  /** Expand delimited tags check box */
+  QCheckBox* m_expandDelimitedTagsCheckBox;
+  /** Tag delimiter line edit */
+  QLineEdit* m_tagDelimiterLineEdit;
   /** ID3v2 text encoding combo box */
   QComboBox* m_textEncodingComboBox;
   /** ID3v2 version combo box */
