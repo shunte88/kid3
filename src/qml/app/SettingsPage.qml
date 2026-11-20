@@ -72,6 +72,16 @@ AbstractSettingsPage {
           onDeactivated: function() { tagCfg.genreNotNumeric = value; }
         },
         SettingsElement {
+          name: qsTr("Expand delimited tags")
+          onActivated: function() { value = tagCfg.expandDelimitedTags; }
+          onDeactivated: function() { tagCfg.expandDelimitedTags = value; }
+        },
+        SettingsElement {
+          name: qsTr("Delimiter")
+          onActivated: function() { value = tagCfg.tagDelimiter; }
+          onDeactivated: function() { tagCfg.tagDelimiter = value; }
+        },
+        SettingsElement {
           name: qsTr("WAV files with lowercase id3 chunk")
           onActivated: function() { value = tagCfg.lowercaseId3RiffChunk; }
           onDeactivated: function() { tagCfg.lowercaseId3RiffChunk = value; }
