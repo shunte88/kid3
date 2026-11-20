@@ -2438,6 +2438,18 @@ replacement</guilabel> check box is checked.
 </para>
 
 <para>
+When <guilabel>Expand delimited tags</guilabel> in
+<guilabel>Multiple Values</guilabel> is checked, values of the artist, album
+artist, original artist, sort artist, sort album artist, performer, track
+artist and genre frames which contain the <guilabel>Delimiter</guilabel>
+(";" by default) are split into multiple values when the files are saved.
+For example, the genre "Electronic;Pop;Electro" is stored as three genres.
+Whitespace around the values is removed. Vorbis comments get a separate
+field for each value, for the other tag formats, the values are stored
+in a single frame as multiple values.
+</para>
+
+<para>
 The table in <guilabel>Rating</guilabel> contains the mapping of star ratings
 to the effective values stored in the tag. The frames with rating information
 are listed in the Rating row of the
